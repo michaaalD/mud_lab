@@ -1,27 +1,27 @@
-% Michal Dos 263498
+% Michal Dos; nr indeksu : 263498
 % Poniedzialek 13.15 TP
 % Lab 1
 
 clear; clc; close all;
-hold on; grid on;
+
 
 % Dane o wartosciach nominalnych
 
-QgN= 1000;     % nominalna wartosc mocy grzejnika
-TwewN = 20;    % nominalna temperatura wewnatrz
-TzewN = -20;   % nominalna temperatura na zewnatrz
-TpN = 10;      % nominalna temperatura "przewodzenia" sufitu
+QgN= 1000;      % nominalna wartosc mocy grzejnika
+TwewN = 20;     % nominalna temperatura wewnatrz
+TzewN = -20;    % nominalna temperatura na zewnatrz
+TpN = 10;       % nominalna temperatura poddasza
 a = 0.4;        % wspolczynnik do wyliczania Kcw
 b = 0.6;        % wspolczynnik do wyliczania Kcwp
 
 %Wartosci wspolcznikow wyliczane ze wzorow:
 
-Kcp = (5*QgN)/(5*(TpN-TzewN));
+Kcp = (b*QgN)/((TpN-TzewN));
 Kcw = (a*QgN)/(TwewN-TzewN);
 Kcwp = (b*QgN)/(TwewN-TpN);
 
-Qg = 0:500:5500;
-Tzew = -30:5:30;
+Qg = 500:500:2500;
+Tzew = -20:5:30;
 
 %Temperatury wyliczane ze wzorów:
 
@@ -30,7 +30,7 @@ Tzew = -30:5:30;
 % 0 = Qg - Kcw(Twew - Tzew) - Kcwp(Twew - Tp)
 % 0 = Kcwp(Twew - Tp) - Kcp(Tp - Tzew)
 
-%% wzor na Twew
+%% wzor 
 % Kcwp(Twew - Tp) = Kcp(Tp - Tzew)
 % Qg = Kcw(Twew - Tzew) - Kcp(Tp - Tzew)
 % Qg + Kcp(Tp - Tzew) = Kcw(Twew - Tzew)
@@ -40,27 +40,39 @@ Tzew = -30:5:30;
 % Qg + Kcw(Twew - Tzew) = Kcp(Tp - Tzew)
 % (Qg + Kcw(Twew - Tzew))/Kcp + Tzew = Tp
 
+% 
+%Twew = ((QgN *(Kcwp+Kcp))/((Kcw*Kcwp) + (Kcw * Kcp) + (Kcwp*Kcp)))+ Tzew ;
+%Tp = ( (QgN * Kcwp) /( (Kcw*Kcwp) + (Kcw*Kcp) + (Kcwp*Kcp))) + Tzew ;
 
-Twew = (Qg + Kcp*(Tp - Tzew))/Kcw + Tzew ;
-Tp = (Qg + Kcw*(Twew - Tzew))/Kcp + Tzew ;
-
-%wykresy
 figure(1)
-for i=1:length(Tzew)
+hold on; grid on
+for i=1:length(Qg)
+    Twew = ( (Qg(i)*(Kcwp+Kcp)) / ((Kcw*Kcwp)+(Kcw*Kcp)+(Kcwp*Kcp)) ) + Tzew;
     plot(Tzew,Twew);
-    plot(-20,20,'o');
+    display(Twew);
+    display(Tzew(i));
+    title('Wykres Twew(Tzew)');
     xlabel('Tzew');
     ylabel('Twew');
-    title('Charakterystyka Twew(Tzew)');
+    plot(-20,20,'o','MarkerSize',10);
 end
 
-%Charakterystyka Tp(Tzew)
-figure(2)
-for j=1:length(Tzew)
-    plot(Tzew,Tp);
-    plot(-20,10,'o');
-    xlabel('Tzew');
-    ylabel('Tp');
-    title('Charakterystyka Tp(Tzew)');
-    
+ figure(2)
+ hold on; grid on
+ for i=1:length(Tzew)
+    Twew =( (Qg *(Kcwp+Kcp)) / ( (Kcw*Kcwp) + (Kcw * Kcp) + (Kcwp*Kcp) ))+ Tzew(i);    
+    display(Twew);
+    plot(Qg,Twew);
+    title('Wykres Twew(Q)');
+    xlabel('Q');
+    ylabel('Twew');
+    plot(1000,20,'o','MarkerSize',10);
 end
+
+
+% for i=1:length(Tzew)
+%     display(Tzew(i))
+% end
+% 
+
+
