@@ -1,4 +1,3 @@
-
 %Lab08
 
 clear all;
@@ -46,7 +45,7 @@ for i = 1:3
     h2=(fwej1+fwej2)/a2;
     
     h0= [h1 h2];
-    sim('rowstansim08');
+    sim('');
     
     subplot(2,1,1);
     hold on;
@@ -78,7 +77,7 @@ for i = 1:3
     h1=fwej1/a1+(fwej2+fwej1)/a2;
     h2=(fwej1+fwej2)/a2;
     fwej1=0;
-    sim('transmitancjasim');
+    sim('');
     
   
     subplot(2,1,1); 
