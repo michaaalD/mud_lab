@@ -9,24 +9,28 @@ t0=5;
 
 
 %zbiornik gorny
-A1=4; Aw1=0.4; H1=9;
+A1=8; 
+Aw1=0.8; 
+H1=4;
 
 %zbiornik dolny
-A2=4; Aw2=0.4; H2=6;
+A2=8; 
+Aw2=0.8;
+H2=3;
 
 %wspolczynniki linearyzacji
-a2=sqrt(2*g*Aw2*Aw2/H2);
-a1=sqrt((2*g*Aw1*Aw1)/(H1-H2));
+a2=Aw2*sqrt(2*g*H2)/H2;
+a1=(Aw1*sqrt(2*g*(H1-H2)))/(H1-H2);
 
-%maksymalne wartosci przeplywu wejsciowego
-Fwe1max = a1*(H1-H2);
-Fwe2max = a2*H2-Fwe1max;
 
-dFwe1=0.1*Fwe1max;
-Fwe2 = 0.1*Fwe2max;
-dFwe2 =0;
+fwej1max = a1*(H1-H2);
+fwej2max = a2*H2-fwej1max;
 
-Fwe1tab = [0 0.5*Fwe1max 0.9*Fwe1max];
+dfwej1=0.1*fwej1max;
+fwej2 = 0.1*fwej2max;
+dfwej2 =0;
+
+Vfwej0_1 = [0 0.5*fwej1max 0.9*fwej1max];
 
 % Rownania stanu
 A =[-a1/A1 a1/A1; a1/A2 -(a1+a2)/A2];
@@ -36,10 +40,10 @@ D= [0,0;0,0];
 
 figure(1)
 for i = 1:3
-    Fwe1 = Fwe1tab(i);
+    fwej1 = Vfwej0_1(i);
     %punkty rownowagi
-    h1=Fwe1/a1+(Fwe2+Fwe1)/a2;
-    h2=(Fwe1+Fwe2)/a2;
+    h1=fwej1/a1+(fwej2+fwej1)/a2;
+    h2=(fwej1+fwej2)/a2;
     
     h0= [h1 h2];
     sim('rowstansim08');
@@ -70,10 +74,10 @@ MS = [A1*A2 (A1*a1+A1*a2+A2*a1) a1*a2];
 
 figure(2)
 for i = 1:3
-    Fwe1 = Fwe1tab(i);
-    h1=Fwe1/a1+(Fwe2+Fwe1)/a2;
-    h2=(Fwe1+Fwe2)/a2;
-    Fwe1=0;
+    fwej1 = Vfwej0_1(i);
+    h1=fwej1/a1+(fwej2+fwej1)/a2;
+    h2=(fwej1+fwej2)/a2;
+    fwej1=0;
     sim('transmitancjasim');
     
   
