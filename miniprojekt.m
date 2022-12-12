@@ -123,3 +123,331 @@ grid on
 xlabel('t [s]');
 ylabel('Tp(t)');
 title('Temperatura poddasza (Transmitancje)');
+
+
+
+
+
+
+%Lab11
+
+%zmienne wyjściowe Tw1, Tw2
+%zmienne wejściowe Tzew, Tkz, Fk
+clear all;
+close all;
+%wartosci nominalne
+TzewN=-20;
+Tw1N=20;
+Tw2N=15;
+TkzN=30;
+PkN=20000;
+Vw1=4*7*2.5;
+Vw2=Vw1*0.8;
+cpp=1000;
+rop=1.2;
+
+%identyfikacja parametrów statycznych
+FkN=PkN/(cpp*rop*TkzN);
+Ks1=(cpp*rop*FkN*(TkzN-Tw2N))/(Tw2N+Tw1N-2*TzewN);
+Ks2=Ks1;
+K0=(-Ks1*(Tw1N-TzewN)+cpp*rop*FkN*(TkzN-Tw1N))/(Tw1N-Tw2N);
+
+%parametry dynamiczne
+Cv1=cpp*rop*Vw1;
+Cv2=cpp*rop*Vw2;
+Fk00=[TkzN-2 TkzN TkzN+1 ];
+a= [0.8 1];
+for j=1:2
+for i=1:3
+%warunki poczatkowe
+Tzew0=TzewN;
+Tkz0=Fk00(i);
+Fk0=a(j)*FkN;
+
+%stan równowagi
+c=cpp*rop*Fk0;
+E=[c+Ks1+K0, -K0; c+K0 -K0-c-Ks2];
+F=[c*Tkz0+Ks1*Tzew0; -Ks2*Tzew0];
+G=inv(E)*F;
+Tw10=G(1);
+Tw20=G(2);
+
+%symulacja
+ts=2000; %czas symulacji
+t0=200; % czas skoku;
+dTzew=0;
+dTkz=1;
+dFk=0;  % uklad liniowy dla dFk=0
+
+
+%rownania stanu
+A=[(-cpp*rop*Fk0-Ks1-K0)/Cv1, K0/Cv1; (K0+cpp*rop*Fk0)/Cv2 (-K0-cpp*rop*Fk0-Ks2)/Cv2];
+B=[(cpp*rop*Fk0)/Cv1, Ks1/Cv1; 0, Ks2/Cv2];
+C=[1,0;0,1];
+D=[0,0;0,0];
+trow=[Tw10,Tw20];
+
+%transmitancja
+MS=[-Cv1*Cv2, Cv1*(-K0-c-Ks2)-Cv2*(c+Ks1+K0), (c+Ks1+K0)*(-K0-c-Ks2)+K0*(K0+c)];
+L1=[-Cv2*Ks1, Ks1*(-K0-c-Ks2)-Ks2*K0];
+L2=[-Ks2*Cv1, -Ks2*(K0+c+Ks1)-Ks1*(K0+c)];
+L3=[-c*(K0+c)];
+L4=[-c*Cv2, c*(-c-K0-Ks2)];
+
+
+figure(1);
+sim('miniprojekttransim');
+  
+
+    hold on;
+    x=[1,3];
+    subplot(4,2,x(j));
+    plot(ans.tout,ans.tw1tr);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title(['Fk=',num2str(a(j)),'*FkN, dTkz=1°C ']);
+    legend('TkzN-2°C','TkzN','TkzN+1°C');
+    hold off;
+
+    
+    hold on;
+    subplot(4,2,j+j);
+    plot(ans.tout,ans.tw2tr);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title(['Fk=',num2str(a(j)),'*FkN, dTkz=1°C']);
+    legend('TkzN-2°C','TkzN','TkzN+1°C');
+    hold off;
+    
+    figure(2);
+    sim('miniprojektsim2');
+  
+
+    hold on;
+    x=[1,3];
+    subplot(4,2,x(j));
+    plot(ans.tout,ans.tw1rs);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title(['Fk=',num2str(a(j)),'*FkN, dTkz=1°C ']);
+    legend('TkzN-2°C','TkzN','TkzN+1°C');
+    hold off;
+
+    
+    hold on;
+    subplot(4,2,j+j);
+    plot(ans.tout,ans.tw2rs);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title(['Fk=',num2str(a(j)),'*FkN, dTkz=1°C']);
+    legend('TkzN-2°C','TkzN','TkzN+1°C');
+    hold off;
+
+end;
+end;
+Fk01=[TzewN-1 TzewN TzewN+2 ];
+a= [0.8 1];
+for j=1:2
+for i=1:3
+%warunki poczatkowe
+Tzew0=Fk01(i);
+Tkz0=TkzN;
+Fk0=a(j)*FkN;
+
+%stan równowagi
+c=cpp*rop*Fk0;
+E=[c+Ks1+K0, -K0; c+K0 -K0-c-Ks2];
+F=[c*Tkz0+Ks1*Tzew0; -Ks2*Tzew0];
+G=inv(E)*F;
+Tw10=G(1);
+Tw20=G(2);
+
+dTzew=2;
+dTkz=0;
+
+%rownania stanu
+A=[(-cpp*rop*Fk0-Ks1-K0)/Cv1, K0/Cv1; (K0+cpp*rop*Fk0)/Cv2 (-K0-cpp*rop*Fk0-Ks2)/Cv2];
+B=[(cpp*rop*Fk0)/Cv1, Ks1/Cv1; 0, Ks2/Cv2];
+C=[1,0;0,1];
+D=[0,0;0,0];
+trow=[Tw10,Tw20];
+
+%transmitancja
+MS=[-Cv1*Cv2, Cv1*(-K0-c-Ks2)-Cv2*(c+Ks1+K0), (c+Ks1+K0)*(-K0-c-Ks2)+K0*(K0+c)];
+L1=[-Cv2*Ks1, Ks1*(-K0-c-Ks2)-Ks2*K0];
+L2=[-Ks2*Cv1, -Ks2*(K0+c+Ks1)-Ks1*(K0+c)];
+L3=[-c*(K0+c)];
+L4=[-c*Cv2, c*(-c-K0-Ks2)];
+
+
+figure(1);
+sim('miniprojekttransim');
+  
+
+    hold on;
+    x=[5,7];
+    subplot(4,2,x(j));
+    plot(ans.tout,ans.tw1tr);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title(['Fk=',num2str(a(j)),'*FkN, dTzew=2°C ']);
+    legend('TkzN-2°C','TkzN','TkzN+1°C');
+    hold off;
+
+    
+    hold on;
+    subplot(4,2,j+j+4);
+    plot(ans.tout,ans.tw2tr);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title(['Fk=',num2str(a(j)),'*FkN, dTzew=2°C']);
+    legend('TzewN-1°C','TzewN','TzewN+2°C');
+    hold off;
+    
+    figure(2);
+    sim('miniprojektsim2');
+  
+
+    hold on;
+    x=[5,7];
+    subplot(4,2,x(j));
+    plot(ans.tout,ans.tw1rs);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title(['Fk=',num2str(a(j)),'*FkN, dTzew=2°C ']);
+    legend('TzewN-1°C','TzewN','TzewN+2°C');
+    hold off;
+
+    
+    hold on;
+    subplot(4,2,j+j+4);
+    plot(ans.tout,ans.tw2rs);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title(['Fk=',num2str(a(j)),'*FkN, dTzew=2°C']);
+    legend('TzewN-1°C','TzewN','TzewN+2°C');
+    hold off;
+
+end;
+end;
+figure(3)
+Fk02=[TkzN-1 TkzN TkzN+2 ];
+for i=1:3
+%warunki poczatkowe
+Tzew0=TzewN;
+Tkz0=Fk02(i);
+Fk0=FkN;
+
+%stan równowagi
+c=cpp*rop*Fk0;
+E=[c+Ks1+K0, -K0; c+K0 -K0-c-Ks2];
+F=[c*Tkz0+Ks1*Tzew0; -Ks2*Tzew0];
+G=inv(E)*F;
+Tw10=G(1);
+Tw20=G(2);
+
+dTzew=0;
+dTkz=-1;
+
+sim('miniprojekt1');
+ 
+    hold on;
+    subplot(3,2,1);
+    plot(ans.tout,ans.tw1);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title('dTkz=-1°C');
+    legend('TkzN-1°C','TkzN','TkzN+2°C');
+    hold off;
+
+    
+    hold on;
+    subplot(3,2,2);
+    plot(ans.tout,ans.tw2);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title('dTkz=-1°C');
+    legend('TkzN-1°C','TkzN','TkzN+2°C');
+    hold off;
+end;
+Fk04=[0.7*FkN 0.9*FkN FkN ];
+for i=1:3
+%warunki poczatkowe
+Tzew0=TzewN;
+Tkz0=TkzN;
+Fk0=Fk04(i);
+
+%stan równowagi
+c=cpp*rop*Fk0;
+E=[c+Ks1+K0, -K0; c+K0 -K0-c-Ks2];
+F=[c*Tkz0+Ks1*Tzew0; -Ks2*Tzew0];
+G=inv(E)*F;
+Tw10=G(1);
+Tw20=G(2);
+
+dTkz=0;
+dFk=0.2*FkN;
+
+sim('miniprojekt1');
+ 
+    hold on;
+    subplot(3,2,3);
+    plot(ans.tout,ans.tw1);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title('dFk=0.2*FkN');
+    legend('0.7*FkN','0.9*FkN','FkN');
+    hold off;
+
+    
+    hold on;
+    subplot(3,2,4);
+    plot(ans.tout,ans.tw2);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title('dFk=0.2*FkN');
+    legend('0.7*FkN','0.9*FkN','FkN');
+    hold off;
+end;
+Fk03=[TzewN-2 TzewN TzewN+1 ];
+for i=1:3
+%warunki poczatkowe
+Tzew0=Fk03(i);
+Tkz0=TkzN;
+Fk0=FkN;
+
+%stan równowagi
+c=cpp*rop*Fk0;
+E=[c+Ks1+K0, -K0; c+K0 -K0-c-Ks2];
+F=[c*Tkz0+Ks1*Tzew0; -Ks2*Tzew0];
+G=inv(E)*F;
+Tw10=G(1);
+Tw20=G(2);
+
+dFk=0;
+dTzew=2;
+
+sim('miniprojekt1');
+ 
+    hold on;
+    subplot(3,2,5);
+    plot(ans.tout,ans.tw1);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title('dTzew=2°C');
+    legend('TzewN-2°C','TzewN','TzewN+1°C');
+    hold off;
+
+    
+    hold on;
+    subplot(3,2,6);
+    plot(ans.tout,ans.tw2);
+    xlabel('t[s]');
+    ylabel('T[°C]');
+    title('dTzew=2°C');
+    legend('TzewN-2°C','TzewN','TzewN+1°C');
+    hold off;
+    
+    
+
+end;
