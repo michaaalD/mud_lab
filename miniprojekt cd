@@ -1,0 +1,73 @@
+% Macierze uzyte do State Space'a
+% x'= Ax + Bu
+% y = Cx + Du 
+A =[ -(a+K_1+K_w)/C_vw,    K_1/C_vw    ;
+          K_1/C_vp    , -(K_1+K_p)/C_vp];
+            
+B =[ c_p*ro_p*f_pN/C_vw, K_w/C_vw ;
+             0        , K_p/C_vp ];
+C=[1,0;
+   0,1];
+
+D=[0,0;
+   0,0];
+
+% Funkcja ktora zamienia state space na transmitancje
+[L1,M1]=ss2tf(A,B,C,D,1);
+[L2,M2]=ss2tf(A,B,C,D,2);
+
+
+%-----------------------------------
+% T_z
+
+d_T_z = 5;
+d_T_zew = 0;
+
+sim('my_dom_trans');
+subplot(2,2,1)
+plot(T_wew_trans,'r*')
+xlabel('Czas [s]')
+ylabel("T_{wew} [^{\circ}C]")
+hold on;
+grid on
+title('Skok dT_{z}=5')
+hold on;
+legend('Wartosci Nominalne','\Delta T_{z}=-3 ^{\circ}C i \Delta T_{zew}=+5 ^{\circ}C','Location','SouthEast')
+
+subplot(2,2,2)
+plot(T_p_trans,'r*')
+grid on;
+xlabel('Czas [s]')
+ylabel("T_{p} [^{\circ}C]")
+hold on;
+title('Skok dT_{z}=5')
+hold on;
+legend('Wartosci Nominalne','\Delta T_{z}=-3 ^{\circ}C i \Delta T_{zew}=+5 ^{\circ}C','Location','SouthEast')
+%-----------------------------------
+% T_zew
+subplot(2,2,3)
+d_T_z = 0;
+d_T_zew = 2;
+
+sim('my_dom_trans');
+plot(T_wew_trans,'r*')
+xlabel('Czas [s]')
+ylabel("T_{wew} [^{\circ}C]")
+hold on;
+grid on
+title('Skok dT_{zew}=2')
+hold on;
+legend('Wartosci Nominalne','\Delta T_{z}=-3 ^{\circ}C i \Delta T_{zew}=+5 ^{\circ}C','Location','SouthEast')
+
+subplot(2,2,4)
+plot(T_p_trans,'r*')
+grid on;
+xlabel('Czas [s]')
+ylabel("T_{p} [^{\circ}C]")
+title('Skok dT_{zew}=2')
+hold on
+legend('Wartosci Nominalne','\Delta T_{z}=-3 ^{\circ}C i \Delta T_{zew}=+5 ^{\circ}C','Location','SouthEast')
+%-----------------------------------
+
+
+
